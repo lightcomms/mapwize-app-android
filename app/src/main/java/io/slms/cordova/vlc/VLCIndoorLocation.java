@@ -263,7 +263,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
 
     public void defineLocation(IndoorLocation indoorLocation) {
         handler.removeCallbacks(mRunnable);
-        handler.postDelayed(mRunnable,20_000);
+        handler.postDelayed(mRunnable,5_000);
         mLocationLocked = true;
         this.dispatchIndoorLocationChange(indoorLocation);
         lastLocation.setFloor(indoorLocation.getFloor());

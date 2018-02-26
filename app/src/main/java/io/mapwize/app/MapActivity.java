@@ -157,7 +157,7 @@ public class MapActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.eyJ1IjoieGF2aWVybWVsZW5kZXoiLCJhIjoiY2pkdmgyaDJiMDlyZzJxczRiOTJoZ250YSJ9.nFGN96rpfQUIvAT5pB7hMw");
+        Mapbox.getInstance(this, "pk.eyJ1IjoibWFwd2l6ZSIsImEiOiJjamNhYnN6MjAwNW5pMnZvMnYzYTFpcWVxIn0.veTCqUipGXCw8NwM2ep1Xg");
         setContentView(R.layout.activity_map);
         findViews();
 
