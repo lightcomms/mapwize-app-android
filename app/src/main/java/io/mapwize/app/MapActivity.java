@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import io.indoorlocation.core.IndoorLocation;
 
@@ -88,11 +89,14 @@ import io.mapwize.mapwizeformapbox.model.Route;
 import io.mapwize.mapwizeformapbox.model.Translation;
 import io.mapwize.mapwizeformapbox.model.Universe;
 import io.mapwize.mapwizeformapbox.model.Venue;
+import io.slms.cordova.vlc.VLCIndoorLocation;
 
 import static com.mikepenz.materialize.util.UIUtils.convertDpToPixel;
 
 public class MapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SearchResultsListAdapter.Listener {
+    private static final int MY_PERMISSION_CAMERA = 6;
+    private java.util.logging.Logger logger = Logger.getLogger(MapActivity.class.getName());
 
     private static final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 0;
 
@@ -459,7 +463,8 @@ public class MapActivity extends AppCompatActivity
                 mapwizePlugin.setTopPadding((int)convertDpToPixel(TOP_PADDING,MapActivity.this));
                 initInterfaceComponents();
                 initMapwizePluginListeners();
-                requestLocationPermission();
+                requestVLCLocationPermission();
+                //requestLocationPermission();
                 setupSearchEditTexts();
             }
         });
@@ -1446,6 +1451,12 @@ public class MapActivity extends AppCompatActivity
         }
     }
 
+    private void requestVLCLocationPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, MY_PERMISSION_CAMERA);
+        }else setupVLCLocationProvider();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -1453,6 +1464,13 @@ public class MapActivity extends AppCompatActivity
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setupLocationProvider();
                 }
+                break;
+            }
+            case MY_PERMISSION_CAMERA: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setupVLCLocationProvider();
+                }
+                break;
             }
         }
     }
@@ -1460,6 +1478,11 @@ public class MapActivity extends AppCompatActivity
     private void setupLocationProvider() {
         mapwizeLocationProvider = new MapwizeLocationProvider(MapActivity.this);
         mapwizePlugin.setLocationProvider(mapwizeLocationProvider);
+    }
+
+    private void setupVLCLocationProvider(){
+        VLCIndoorLocation.init(getApplication(),"anapikeyforvlc");
+        mapwizePlugin.setLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
     }
 
     @Override
@@ -1523,7 +1546,8 @@ public class MapActivity extends AppCompatActivity
         }
 
         if (parsedUrlObject.getIndoorLocation() != null) {
-            mapwizeLocationProvider.defineLocation(parsedUrlObject.getIndoorLocation());
+            VLCIndoorLocation.getVlcIndoorLocation().defineLocation(parsedUrlObject.getIndoorLocation());
+            //mapwizeLocationProvider.defineLocation(parsedUrlObject.getIndoorLocation());
         }
 
         if (parsedUrlObject.getLanguage() != null) {

@@ -4,6 +4,7 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        mavenLocal()
         google()
     }
     dependencies {
@@ -27,6 +28,7 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
+        mavenLocal()
         maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://maven.mapwize.io'}
 

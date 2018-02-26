@@ -17,10 +17,25 @@ android {
         versionCode 30003
         versionName "3.0.2"
     }
+    signingConfigs {
+        release {
+            try {
+                storeFile file("/Users/xme/.android/"+KEY_FILE )
+                //noinspection GroovyAssignabilityCheck
+                storePassword KEYSTORE_PASSWORD
+                keyAlias KEY_ALIAS
+                //noinspection GroovyAssignabilityCheck
+                keyPassword KEY_PASSWORD
+            } catch (ex) {
+                //throw new InvalidUserDataException("You should define KEYSTORE_PASSWORD and KEY_PASSWORD and KEY_ALIAS in gradle.properties.\nException thrown:\t" + ex)
+            }
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     applicationVariants.all { variant ->
@@ -47,5 +62,9 @@ dependencies {
     implementation 'com.github.IndoorLocation:indoor-location-android:1.0.4'
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'io.mapwize.indoormaps:MapwizeForMapbox:1.0.3'
+    // Lucibel IndoorLocationPorvider implementation
+    implementation('io.slms.cordova.vlc:vlclib:1.4')
+    implementation('com.squareup.okhttp3:okhttp:3.9.1')
+    implementation('com.squareup.moshi:moshi:1.5.0')
 
 }
