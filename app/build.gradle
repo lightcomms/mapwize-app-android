@@ -22,10 +22,9 @@ android {
             try {
                 if (System.properties['os.name'].toLowerCase().contains('windows')) {
                     storeFile file("C:\\Users\\Xavier\\.android\\"+KEY_FILE )
-                } else {
+                } else { //Unix or Darwin system
                     storeFile file("/Users/xme/.android/"+KEY_FILE )
                 }
-                storeFile file("/Users/xme/.android/"+KEY_FILE )
                 //noinspection GroovyAssignabilityCheck
                 storePassword KEYSTORE_PASSWORD
                 keyAlias KEY_ALIAS
@@ -42,7 +41,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
