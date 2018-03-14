@@ -199,7 +199,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
         //Sequencer.camBack(application.getApplicationContext());
         //logger.severe("XME : STARTED VLC!!");
 
-        Sequencer.start(application.getApplicationContext(), ipcCallbacks,"camback", 100);
+        Sequencer.start(application.getApplicationContext(), ipcCallbacks,"camfront", 100);
     }
 
     @Override
