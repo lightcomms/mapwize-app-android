@@ -71,7 +71,23 @@ dependencies {
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'io.mapwize.indoormaps:MapwizeForMapbox:1.0.3'
     // Lucibel IndoorLocationPorvider implementation
-    /*
+    /* Script for maven
+    echo install maven localy:
+    mvn install:install-file  \
+        -Dfile=C:\Users\Xavier\WorkspaceAndroidStudio\dev\android_vlc_core\vlclib\build\outputs\aar\vlclib-release.aar  \
+        -DgroupId=io.slms.cordova.vlc \
+        -DartifactId=vlclib \
+        -Dversion=1.4 \
+        -Dpackaging=aar
+
+    echo install maven on your server:
+    mvn deploy:deploy-file -DgroupId=io.slms.cordova.vlc \
+      -DartifactId=vlclib \
+      -Dversion=1.0.0 \
+      -Dpackaging=aar \
+      -Dfile=/Users/xme/Desktop/CompleteVLCPlugin/002android_vlc_core/vlc-plugin-lite/src/android/vlclib-universal-unsigned.aar \
+      -DrepositoryId=snapshots \
+      -Durl=http://localhost:8081/artifactory/libs-snapshot-local/
 
      */
     implementation('io.slms.cordova.vlc:vlclib:1.4')
