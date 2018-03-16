@@ -5,6 +5,7 @@ buildscript {
         jcenter()
         mavenCentral()
         mavenLocal()
+        maven { url 'http://192.168.10.105:8081/artifactory/libs-release/'}
         google()
     }
     dependencies {
@@ -23,6 +24,8 @@ allprojects {
     apply plugin: 'maven-publish'
 
     repositories {
+        maven { url 'http://192.168.10.105:8081/artifactory/libs-release/'}
+
         jcenter()
         google()
         maven {
@@ -31,7 +34,6 @@ allprojects {
         mavenLocal()
         maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://maven.mapwize.io'}
-
     }
 }
 
