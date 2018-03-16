@@ -164,6 +164,7 @@ public class MapActivity extends AppCompatActivity
         mapView.onCreate(savedInstanceState);
 
         final MapOptions opts = new MapOptions.Builder()
+                .floor(7.0)
                 .build();
 
         initMapWithOptions(opts);
@@ -1483,6 +1484,7 @@ public class MapActivity extends AppCompatActivity
     private void setupVLCLocationProvider(){
         VLCIndoorLocation.init(getApplication(),"anapikeyforvlc");
         mapwizePlugin.setLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
+        VLCIndoorLocation.getVlcIndoorLocation().defineLocation(new IndoorLocation(null ,48.887988338992166,2.168635725975037,7.0,0l));
     }
 
     @Override
