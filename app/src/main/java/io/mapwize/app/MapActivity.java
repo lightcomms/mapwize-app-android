@@ -467,8 +467,18 @@ public class MapActivity extends AppCompatActivity
                 requestVLCLocationPermission();
                 //requestLocationPermission();
                 setupSearchEditTexts();
+                setStartupWindow();
             }
         });
+    }
+
+    private void setStartupWindow() {
+        logger.entering(MapActivity.class.getSimpleName(), "setStartupZoom");
+
+
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(48.888508338992166, 2.168999725975037,48.887452338992166, 2.168148725975037)
+                , 10, 400, 10, 300);
+        mapboxMap.easeCamera(cu);
     }
 
     private void openSearchTable(SearchMode mode) {

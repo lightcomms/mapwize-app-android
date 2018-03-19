@@ -13,7 +13,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="112dp"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:src="@drawable/ic_mapwize_icon" />
 
