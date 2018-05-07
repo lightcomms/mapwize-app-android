@@ -8,6 +8,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- Wifi -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application
         android:label="Mapwize"
@@ -33,7 +39,14 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:theme="@style/MaterialDrawerTheme.Light.TranslucentStatus">
-
+            <intent-filter
+                android:label="Mapwize"
+                android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mapwize" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -42,7 +55,6 @@
             android:configChanges="orientation|screenSize"
             android:theme="@style/MaterialDrawerTheme.Light.TranslucentStatus">
         </activity>
-
     </application>
 
 </manifest>

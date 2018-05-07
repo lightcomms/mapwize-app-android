@@ -76,7 +76,7 @@ public class SearchResultsListAdapter extends RecyclerView.Adapter<SearchResults
             holder.floorView.setText(String.format(floorPlaceHolder, nf.format(place.getFloor())));
             holder.floorView.setVisibility(View.VISIBLE);
             if (place.getIcon()!= null && place.getIcon().length() > 0) {
-                Picasso.with(mContext).load(place.getIcon()).into(holder.leftIcon);
+                Picasso.get().load(place.getIcon()).into(holder.leftIcon);
             }
         }
 
@@ -93,7 +93,7 @@ public class SearchResultsListAdapter extends RecyclerView.Adapter<SearchResults
             }
             holder.floorView.setVisibility(View.GONE);
             if (placeList.getIcon() != null && placeList.getIcon().length() > 0) {
-                Picasso.with(mContext).load(placeList.getIcon()).into(holder.leftIcon);
+                Picasso.get().load(placeList.getIcon()).into(holder.leftIcon);
             }
         }
 
@@ -103,7 +103,7 @@ public class SearchResultsListAdapter extends RecyclerView.Adapter<SearchResults
             holder.titleView.setText(translation.getTitle());
             holder.subtitleView.setVisibility(View.GONE);
             holder.floorView.setVisibility(View.GONE);
-            Picasso.with(mContext).load(venue.getIcon()).into(holder.leftIcon);
+            Picasso.get().load(venue.getIcon()).into(holder.leftIcon);
         }
 
         if (suggestionItem instanceof String) {

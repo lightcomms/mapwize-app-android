@@ -1,93 +1,26 @@
 package io.mapwize.app;
 
 import android.content.Context;
-import android.os.Handler;
-
 import io.indoorlocation.core.IndoorLocation;
-import io.indoorlocation.core.IndoorLocationProvider;
-import io.indoorlocation.core.IndoorLocationProviderListener;
 import io.indoorlocation.gps.GPSIndoorLocationProvider;
+import io.indoorlocation.manual.ManualIndoorLocationProvider;
+import io.indoorlocation.providerselector.SelectorIndoorLocationProvider;
 
-public class MapwizeLocationProvider extends IndoorLocationProvider implements IndoorLocationProviderListener{
+public class MapwizeLocationProvider extends SelectorIndoorLocationProvider {
 
     private GPSIndoorLocationProvider mGpsIndoorLocationProvider;
-    private boolean mStarted;
-    private boolean mLocationLocked;
-    private Handler mHandler;
+    private ManualIndoorLocationProvider mManualIndoorLocationProvider;
 
     MapwizeLocationProvider(Context context) {
-        super();
+        super(60000);
         mGpsIndoorLocationProvider = new GPSIndoorLocationProvider(context);
-        mGpsIndoorLocationProvider.addListener(this);
+        mManualIndoorLocationProvider = new ManualIndoorLocationProvider();
+        this.addIndoorLocationProvider(mGpsIndoorLocationProvider);
+        this.addIndoorLocationProvider(mManualIndoorLocationProvider);
     }
 
-    @Override
-    public boolean supportsFloor() {
-        return true;
+    public void defineLocation(IndoorLocation indoorLocation) {
+        mManualIndoorLocationProvider.setIndoorLocation(indoorLocation);
     }
 
-    @Override
-    public void start() {
-        if (!mStarted) {
-            mGpsIndoorLocationProvider.start();
-            mStarted = true;
-        }
-    }
-
-    @Override
-    public void stop() {
-        if (mStarted) {
-            mGpsIndoorLocationProvider.stop();
-            mStarted = false;
-        }
-    }
-
-    @Override
-    public boolean isStarted() {
-        return mStarted;
-    }
-
-    void defineLocation(IndoorLocation indoorLocation) {
-        if (mHandler == null) {
-            mHandler = new Handler();
-        }
-        mHandler.removeCallbacks(mRunnable);
-        mHandler.postDelayed(mRunnable,120000);
-        mLocationLocked = true;
-        this.dispatchIndoorLocationChange(indoorLocation);
-    }
-
-    private Runnable mRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-            mLocationLocked = false;
-        }
-    };
-
-    /*
-        GPSIndoorLocationProviderListener
-     */
-
-    @Override
-    public void onProviderStarted() {
-
-    }
-
-    @Override
-    public void onProviderStopped() {
-
-    }
-
-    @Override
-    public void onProviderError(Error error) {
-
-    }
-
-    @Override
-    public void onIndoorLocationChange(IndoorLocation indoorLocation) {
-        if (!mLocationLocked) {
-            this.dispatchIndoorLocationChange(indoorLocation);
-        }
-    }
 }

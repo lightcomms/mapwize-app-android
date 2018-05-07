@@ -1,6 +1,7 @@
 package io.mapwize.app;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -53,6 +55,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -70,12 +73,15 @@ import java.util.Map;
 
 import io.indoorlocation.core.IndoorLocation;
 
+import io.indoorlocation.core.IndoorLocationProviderListener;
+import io.mapwize.mapwizeformapbox.DirectionOptions;
 import io.mapwize.mapwizeformapbox.FollowUserMode;
 import io.mapwize.mapwizeformapbox.MapOptions;
 import io.mapwize.mapwizeformapbox.MapwizePlugin;
 import io.mapwize.mapwizeformapbox.Marker;
 import io.mapwize.mapwizeformapbox.api.Api;
 import io.mapwize.mapwizeformapbox.api.ApiCallback;
+import io.mapwize.mapwizeformapbox.api.ApiFilter;
 import io.mapwize.mapwizeformapbox.api.SearchParams;
 import io.mapwize.mapwizeformapbox.model.Direction;
 import io.mapwize.mapwizeformapbox.model.DirectionPoint;
@@ -84,7 +90,6 @@ import io.mapwize.mapwizeformapbox.model.MapwizeObject;
 import io.mapwize.mapwizeformapbox.model.ParsedUrlObject;
 import io.mapwize.mapwizeformapbox.model.Place;
 import io.mapwize.mapwizeformapbox.model.PlaceList;
-import io.mapwize.mapwizeformapbox.model.Route;
 import io.mapwize.mapwizeformapbox.model.Translation;
 import io.mapwize.mapwizeformapbox.model.Universe;
 import io.mapwize.mapwizeformapbox.model.Venue;
@@ -96,9 +101,7 @@ public class MapActivity extends AppCompatActivity
 
     private static final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 0;
 
-    private final int TOP_PADDING = 80;
     private final int BOTTOM_PADDING = 54;
-    private final int TOP_PADDING_DIRECTION = 80;
 
     private MapboxMap mapboxMap;
     private MapView mapView;
@@ -146,24 +149,66 @@ public class MapActivity extends AppCompatActivity
     private boolean inDirectionMode = false;
     private Map<String, FullDirectionObject> directionByVenue = new HashMap<>();
     private List<Place> promotedPlaces = new ArrayList<>();
-    private MapwizeLocationProvider mapwizeLocationProvider;
+    private LocationProvidersManager mapwizeLocationProvider;
     private Venue mCurrentVenue = null;
     private MapwizeObject shouldBeSelected;
+    private boolean startedFromUrl = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.eyJ1IjoibWFwd2l6ZSIsImEiOiJjamNhYnN6MjAwNW5pMnZvMnYzYTFpcWVxIn0.veTCqUipGXCw8NwM2ep1Xg");
+        Mapbox.getInstance(this, "pk.mapwize");
         setContentView(R.layout.activity_map);
         findViews();
-
         mapView.onCreate(savedInstanceState);
 
         final MapOptions opts = new MapOptions.Builder()
                 .build();
 
-        initMapWithOptions(opts);
+        mapwizePlugin = new MapwizePlugin(mapView, opts);
+        initMapwizePluginListeners();
+        mapwizePlugin.setOnDidLoadListener(new MapwizePlugin.OnDidLoadListener() {
+            @Override
+            public void didLoad(MapwizePlugin mapwizePlugin) {
+                initInterfaceComponents();
+                requestLocationPermission();
+                mapwizePlugin.setPreferredLanguage(Locale.getDefault().getLanguage());
+                mapwizePlugin.setTopPadding((int)getApplicationContext().getResources().getDimension(R.dimen.mapwize_distance_to_bottom_of_searchbar));
+                Intent intent = MapActivity.this.getIntent();
+                String url = null;
+                if (intent.getStringExtra("mapwizeUrl") != null) {
+                    url = intent.getStringExtra("mapwizeUrl");
+                }
+                else if (intent.getDataString() != null) {
+                    url = intent.getDataString();
+                }
+                if (url != null) {
+                    startedFromUrl = true;
+                    Api.getParsedUrlObject(url, new ApiCallback<ParsedUrlObject>() {
+                        @Override
+                        public void onSuccess(final ParsedUrlObject object) {
+                            Handler uiHandler = new Handler(Looper.getMainLooper());
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    handleParsedUrl(object);
+                                }
+                            };
+                            uiHandler.post(runnable);
+                        }
 
+                        @Override
+                        public void onFailure(Throwable t) {
+                            if (t != null) {
+                                t.printStackTrace();
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        initMapWithOptions();
+        setupSearchEditTexts();
         MapwizeApplication application = (MapwizeApplication) getApplication();
     }
 
@@ -449,18 +494,12 @@ public class MapActivity extends AppCompatActivity
         infoBottomMoreImageView = findViewById(R.id.info_bottom_more_icon);
     }
 
-    private void initMapWithOptions(final MapOptions opts) {
+    private void initMapWithOptions() {
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mMap) {
                 mapboxMap = mMap;
-                mapwizePlugin = new MapwizePlugin(mapView, mapboxMap, opts);
-                mapwizePlugin.setPreferredLanguage(Locale.getDefault().getLanguage());
-                mapwizePlugin.setTopPadding((int)convertDpToPixel(TOP_PADDING,MapActivity.this));
-                initInterfaceComponents();
-                initMapwizePluginListeners();
-                requestLocationPermission();
-                setupSearchEditTexts();
             }
         });
     }
@@ -476,6 +515,15 @@ public class MapActivity extends AppCompatActivity
 
         RelativeLayout.LayoutParams params = null;
 
+        if (searchSuggestionsListLayout != null) {
+            if (searchSuggestionsListLayout.getParent() == searchBarLayout) {
+                searchBarLayout.removeView(searchSuggestionsListLayout);
+            }
+            if (searchSuggestionsListLayout.getParent() == mapRelativeLayout) {
+                mapRelativeLayout.removeView(searchSuggestionsListLayout);
+            }
+        }
+
         if (mode == SearchMode.DEFAULT) {
             params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
             params.rightMargin = (int)convertDpToPixel(4,this);
@@ -487,10 +535,9 @@ public class MapActivity extends AppCompatActivity
             params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
             params.rightMargin = (int)convertDpToPixel(12,this);
             params.leftMargin = (int)convertDpToPixel(12,this);
-            params.addRule(RelativeLayout.BELOW, directionHeaderMainLayout.getId());
-            if (searchSuggestionsListLayout.getParent() == null) {
-                mapRelativeLayout.addView(searchSuggestionsListLayout, params);
-            }
+            params.addRule(RelativeLayout.BELOW, R.id.direction_header_card);
+            mapRelativeLayout.addView(searchSuggestionsListLayout, params);
+
         }
 
         if (params != null) {
@@ -585,6 +632,7 @@ public class MapActivity extends AppCompatActivity
         mapRelativeLayout.removeView(searchSuggestionsListLayout);
         searchBarLayout.removeView(searchSuggestionsListLayout);
         searchSuggestionsListLayout = null;
+        searchSuggestionsList.setAdapter(null);
         searchSuggestionsList = null;
         currentSearchMode = SearchMode.NONE;
         searchBarEditText.setText("");
@@ -613,12 +661,16 @@ public class MapActivity extends AppCompatActivity
         params.addRule(RelativeLayout.LEFT_OF, mapwizePlugin.followUserModeButton.getId());
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        int rightMargin = (int) getResources().getDimension(io.mapwize.mapwizeformapbox.R.dimen.followUserModeButtonSize);
-        rightMargin += (int) getResources().getDimension(io.mapwize.mapwizeformapbox.R.dimen.marginToScreen);
+        int rightMargin = (int) getResources().getDimension(io.mapwize.mapwizeformapbox.R.dimen.mapwize_followusermode_button_size);
+        rightMargin += (int) getResources().getDimension(io.mapwize.mapwizeformapbox.R.dimen.mapwize_default_component_spacing);
+
         params.setMargins(0, 0, rightMargin, 0);
-        mapwizePlugin.controllerLayout.addView(bottomButtonsLayout, params);
+        bottomButtonsLayout.setPadding(0,0,0, 0);
+        mapwizePlugin.uiLayout.addView(bottomButtonsLayout, params);
+
 
         languagesButton = findViewById(R.id.languages_button);
+        languagesButton.setElevation(8);
         languagesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -627,6 +679,7 @@ public class MapActivity extends AppCompatActivity
         });
 
         universesButton = findViewById(R.id.universes_button);
+        universesButton.setElevation(8);
         universesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -635,6 +688,7 @@ public class MapActivity extends AppCompatActivity
         });
 
         directionButton = findViewById(R.id.direction_button);
+        directionButton.setElevation(8);
         directionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -714,9 +768,7 @@ public class MapActivity extends AppCompatActivity
         mBottomSheetBehavior.setHideable(true);
         mBottomSheetBehavior.setPeekHeight((int)convertDpToPixel(BOTTOM_PADDING, this));
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-
-
+        bottomSheet.setVisibility(View.VISIBLE);
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -727,7 +779,10 @@ public class MapActivity extends AppCompatActivity
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
+                if (mapwizePlugin.getDirection() == null) {
+                    int pad = mapView.getHeight() - bottomSheet.getTop();
+                    mapwizePlugin.setBottomPadding(pad);
+                }
             }
         });
 
@@ -745,6 +800,13 @@ public class MapActivity extends AppCompatActivity
     }
 
     private void initMapwizePluginListeners() {
+
+        mapwizePlugin.addOnFloorChangeListener(new MapwizePlugin.OnFloorChangeListener() {
+            @Override
+            public void onFloorChange(Double floor) {
+            }
+        });
+
         mapwizePlugin.setOnMapClickListener(new MapwizePlugin.OnMapClickListener() {
             @Override
             public void onMapClick(LatLngFloor latLngFloor) {
@@ -760,6 +822,7 @@ public class MapActivity extends AppCompatActivity
                 if (!inDirectionMode) {
                     selectContent(place);
                 }
+
                 return true;
             }
         });
@@ -776,7 +839,6 @@ public class MapActivity extends AppCompatActivity
         mapwizePlugin.setOnVenueEnterListener(new MapwizePlugin.OnVenueEnterListener() {
             @Override
             public void onVenueEnter(Venue venue) {
-
                 if (directionByVenue.get(venue.getId()) != null) {
                     FullDirectionObject o = directionByVenue.get(venue.getId());
                     setupSearchDirectionUI();
@@ -802,6 +864,20 @@ public class MapActivity extends AppCompatActivity
             }
         });
 
+        mapwizePlugin.setOnFollowUserModeChangeListener(new MapwizePlugin.OnFollowUserModeChange() {
+            @Override
+            public void followUserModeChange(int followUserMode) {
+
+                if (followUserMode == FollowUserMode.FOLLOW_USER_AND_HEADING) {
+                    mapboxMap.setCameraPosition(new CameraPosition.Builder().tilt(45).build());
+
+                }
+
+                if (followUserMode == FollowUserMode.FOLLOW_USER) {
+                    mapboxMap.setCameraPosition(new CameraPosition.Builder().tilt(0).build());
+                }
+            }
+        });
 
     }
 
@@ -906,13 +982,22 @@ public class MapActivity extends AppCompatActivity
         progressBar.setVisibility(View.GONE);
         leftActionButton.setVisibility(View.VISIBLE);
         mCurrentVenue = venue;
-        mapwizePlugin.setTopPadding((int)convertDpToPixel(TOP_PADDING,MapActivity.this));
+        mapwizePlugin.setTopPadding((int)getApplicationContext().getResources().getDimension(R.dimen.mapwize_distance_to_bottom_of_searchbar));
         directionHeaderMainLayout.setVisibility(View.GONE);
-        directionBottomInfoLayout.setVisibility(View.GONE);
+        ValueAnimator heightAnimator = ValueAnimator.ofInt(mapwizePlugin.getBottomPadding(), 0);
+        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)directionBottomInfoLayout.getLayoutParams();
+                params.height = (int)animation.getAnimatedValue();
+                directionBottomInfoLayout.setLayoutParams(params);
+                mapwizePlugin.setBottomPadding((int)animation.getAnimatedValue());
+            }
+        });
+        heightAnimator.setDuration(250);
+        heightAnimator.start();
+
         searchBarLayout.setVisibility(View.VISIBLE);
-        if (selectedContent == null) {
-            mapwizePlugin.setBottomPadding(0);
-        }
         inDirectionMode = false;
         for (Place p : promotedPlaces) {
             mapwizePlugin.removePromotedPlace(p);
@@ -958,7 +1043,7 @@ public class MapActivity extends AppCompatActivity
     }
 
     private void setupSearchDirectionUI() {
-        mapwizePlugin.setTopPadding((int)convertDpToPixel(TOP_PADDING_DIRECTION,MapActivity.this));
+        mapwizePlugin.setTopPadding((int)getApplicationContext().getResources().getDimension(R.dimen.mapwize_distance_to_bottom_of_directionsearchbar));
         inDirectionMode = true;
         searchBarLayout.setVisibility(View.GONE);
         directionHeaderMainLayout.setVisibility(View.VISIBLE);
@@ -970,6 +1055,7 @@ public class MapActivity extends AppCompatActivity
         } else {
             directionHeaderAccessibilityButton.setColorFilter(Color.parseColor("#ffffff"));
         }
+
         UiSettings settings = mapboxMap.getUiSettings();
         settings.setCompassMargins(settings.getCompassMarginLeft(), 300, settings.getCompassMarginRight(), settings.getCompassMarginBottom());
 
@@ -997,19 +1083,17 @@ public class MapActivity extends AppCompatActivity
 
     private void startDirection(DirectionPoint fromPoint, DirectionPoint toPoint, Direction direction, boolean fitBounds) {
 
-        if (fitBounds) {
-            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-            for (Route r : direction.getRoutes()) {
-                boundsBuilder.include(r.getBounds().getNorthEast())
-                        .include(r.getBounds().getSouthWest());
-            }
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 10, 400, 10, 300);
-            mapboxMap.easeCamera(cu);
+        DirectionOptions.Builder optsBuilder = new DirectionOptions.Builder();
+        if (!fitBounds) {
+            optsBuilder.centerOnStart(false);
+            optsBuilder.setToStartingFloor(false);
         }
 
+        mapwizePlugin.setFollowUserMode(FollowUserMode.NONE);
+        if (mapwizePlugin.getDirection() != direction) {
+            mapwizePlugin.setDirection(direction, optsBuilder.build());
+        }
         unselectContent();
-        mapwizePlugin.setDirection(direction);
-
         if (fromPoint instanceof Place) {
             Place place = (Place)fromPoint;
             mapwizePlugin.addPromotedPlace(place);
@@ -1035,6 +1119,18 @@ public class MapActivity extends AppCompatActivity
         else {
             directionHeaderToTextView.setText(getResources().getString(R.string.coordinates));
         }
+        ValueAnimator heightAnimator = ValueAnimator.ofInt(mapwizePlugin.getBottomPadding(), (int)convertDpToPixel(BOTTOM_PADDING, this));
+        heightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)directionBottomInfoLayout.getLayoutParams();
+                params.height = (int)animation.getAnimatedValue();
+                directionBottomInfoLayout.setLayoutParams(params);
+                mapwizePlugin.setBottomPadding((int)animation.getAnimatedValue());
+            }
+        });
+        heightAnimator.setDuration(250);
+        heightAnimator.start();
 
         directionBottomInfoLayout.setVisibility(View.VISIBLE);
         directionBottomInfoAccessibleImage.setImageResource(!isAccessible ? R.drawable.ic_directions_walk_black_24dp : R.drawable.ic_accessible_black_24dp);
@@ -1042,7 +1138,6 @@ public class MapActivity extends AppCompatActivity
         String timPlaceHolder = getString(R.string.dir_min);
         directionTime.setText(String.format(timPlaceHolder,time));
         directionDistance.setText(UnitLocale.distanceAsString(direction.getDistance()));
-        mapwizePlugin.setBottomPadding(Math.round(convertDpToPixel(BOTTOM_PADDING, this)));
         directionButton.setVisibility(View.GONE);
 
     }
@@ -1147,11 +1242,10 @@ public class MapActivity extends AppCompatActivity
             }
         }
         if (content.getIcon() != null && content.getIcon().length()>0) {
-            Picasso.with(getApplicationContext()).load(content.getIcon()).into(infoIcon);
+            Picasso.get().load(content.getIcon()).into(infoIcon);
         }
         bottomInfoLayout.setVisibility(View.VISIBLE);
         selectedContent = content;
-        mapwizePlugin.setBottomPadding(Math.round(convertDpToPixel(BOTTOM_PADDING, this)));
 
         if (tr.getDetails() != null && tr.getDetails().length() > 0) {
             ViewGroup.LayoutParams layoutParams = bottomSheet.getLayoutParams();
@@ -1189,7 +1283,6 @@ public class MapActivity extends AppCompatActivity
             contentSelectionMarkers.clear();
             mapwizePlugin.removePromotedPlaces(promotedPlaces);
             promotedPlaces.clear();
-            mapwizePlugin.setBottomPadding(0);
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
     }
@@ -1228,41 +1321,46 @@ public class MapActivity extends AppCompatActivity
     }
 
     private void handleAccessKey(String result) {
-        Api.getAccess(result, new ApiCallback<Boolean>() {
+        mapwizePlugin.grantAccess(result, new ApiCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean object) {
-                mapwizePlugin.refresh(new MapwizePlugin.OnAsyncTaskReady() {
+                Handler uiHandler = new Handler(Looper.getMainLooper());
+                Runnable runnable = new Runnable() {
                     @Override
-                    public void ready() {
+                    public void run() {
 
-                        Handler uiHandler = new Handler(Looper.getMainLooper());
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
+                        mCurrentVenue = mapwizePlugin.getVenue();
+                        if (mCurrentVenue != null && mCurrentVenue.getUniverses().size() > 1) {
+                            universesButton.setVisibility(View.VISIBLE);
+                        }
 
-                                mCurrentVenue = mapwizePlugin.getVenue();
-                                if (mCurrentVenue != null && mCurrentVenue.getUniverses().size() > 1) {
-                                    universesButton.setVisibility(View.VISIBLE);
-                                }
-
-                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapActivity.this);
-                                alertDialog.setTitle(R.string.access_key);
-                                alertDialog.setMessage(R.string.access_granted);
-                                alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.cancel();
-                                    }
-                                });
-                                alertDialog.show();
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapActivity.this);
+                        alertDialog.setTitle(R.string.access_key);
+                        alertDialog.setMessage(R.string.access_granted);
+                        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
                             }
-                        };
-                        uiHandler.post(runnable);
+                        });
+                        alertDialog.show();
+
+                        ApiFilter apiFilter = new ApiFilter.Builder().build();
+                        Api.getVenues(apiFilter, new ApiCallback<List<Venue>>() {
+                            @Override
+                            public void onSuccess(List<Venue> object) {
+                                mapwizeLocationProvider.setVenues(object);
+                                mapwizeLocationProvider.checkVenueForIndoorLocationActivation();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+
+                            }
+                        });
 
                     }
-                });
-
-
-
+                };
+                uiHandler.post(runnable);
             }
 
             @Override
@@ -1285,9 +1383,6 @@ public class MapActivity extends AppCompatActivity
                 uiHandler.post(runnable);
             }
         });
-
-        // TODO recheck if universe button should be shown
-
 
     }
 
@@ -1457,9 +1552,59 @@ public class MapActivity extends AppCompatActivity
         }
     }
 
+    private IndoorLocation lastIndoorLocation = null;
     private void setupLocationProvider() {
-        mapwizeLocationProvider = new MapwizeLocationProvider(MapActivity.this);
-        mapwizePlugin.setLocationProvider(mapwizeLocationProvider);
+        ApiFilter apiFilter = new ApiFilter.Builder().build();
+        Api.getVenues(apiFilter, new ApiCallback<List<Venue>>() {
+            @Override
+            public void onSuccess(final List<Venue> object) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mapwizeLocationProvider = new LocationProvidersManager(MapActivity.this);
+                        mapwizeLocationProvider.setVenues(object);
+                        mapwizePlugin.setLocationProvider(mapwizeLocationProvider);
+                        if (!startedFromUrl) {
+                            mapwizeLocationProvider.addListener(new IndoorLocationProviderListener() {
+                                @Override
+                                public void onProviderStarted() {
+
+                                }
+
+                                @Override
+                                public void onProviderStopped() {
+
+                                }
+
+                                @Override
+                                public void onProviderError(Error error) {
+
+                                }
+
+                                @Override
+                                public void onIndoorLocationChange(IndoorLocation indoorLocation) {
+                                    if (lastIndoorLocation == null && indoorLocation != null) {
+                                        lastIndoorLocation = indoorLocation;
+                                        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(new LatLng(indoorLocation.getLatitude(), indoorLocation.getLongitude()), 16);
+                                        mapboxMap.animateCamera(cu, 3000);
+                                        if (lastIndoorLocation.getFloor() != null) {
+                                            mapwizePlugin.setFloor(lastIndoorLocation.getFloor());
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.i("Error", "Error while loading venues in location provider");
+            }
+        });
+
     }
 
     @Override
@@ -1508,6 +1653,20 @@ public class MapActivity extends AppCompatActivity
                                 }
                             };
                             uiHandler.post(runnable);
+
+                            ApiFilter apiFilter = new ApiFilter.Builder().build();
+                            Api.getVenues(apiFilter, new ApiCallback<List<Venue>>() {
+                                @Override
+                                public void onSuccess(List<Venue> object) {
+                                    mapwizeLocationProvider.setVenues(object);
+                                    mapwizeLocationProvider.checkVenueForIndoorLocationActivation();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable t) {
+
+                                }
+                            });
                         }
                     });
                 }

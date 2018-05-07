@@ -5,31 +5,36 @@
     android:layout_height="wrap_content">
 
     <ImageButton
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/mapwize_followusermode_button_size"
+        android:layout_height="@dimen/mapwize_followusermode_button_size"
+        android:layout_marginBottom="@dimen/mapwize_followusermode_button_bottom_margin"
         android:id="@+id/direction_button"
         android:src="@drawable/ic_directions_black_24dp"
         android:background="@drawable/rounded_button"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/mapwize_default_component_spacing"
         android:visibility="gone"/>
 
     <ImageButton
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/mapwize_followusermode_button_size"
+        android:layout_height="@dimen/mapwize_followusermode_button_size"
+        android:layout_marginBottom="@dimen/mapwize_followusermode_button_bottom_margin"
         android:id="@+id/languages_button"
         android:src="@drawable/ic_language_black_24dp"
         android:background="@drawable/rounded_button"
         android:layout_alignParentLeft="true"
-        android:layout_marginRight="8dp"
+        android:layout_marginLeft="@dimen/mapwize_default_component_spacing"
         android:visibility="gone"/>
 
     <ImageButton
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/mapwize_followusermode_button_size"
+        android:layout_height="@dimen/mapwize_followusermode_button_size"
+        android:layout_marginBottom="@dimen/mapwize_followusermode_button_bottom_margin"
         android:id="@+id/universes_button"
         android:src="@drawable/ic_apps_black_24dp"
         android:background="@drawable/rounded_button"
         android:layout_toRightOf="@+id/languages_button"
+        android:layout_marginLeft="@dimen/mapwize_default_component_spacing"
         android:visibility="gone"/>
 
 </RelativeLayout>

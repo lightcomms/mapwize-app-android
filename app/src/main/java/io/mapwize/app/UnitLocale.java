@@ -22,7 +22,7 @@ class UnitLocale {
     static String distanceAsString(double distance) {
 
         if (getDefault() == Imperial) {
-            long distanceInFeet = Math.round(distance / 3.28084);
+            long distanceInFeet = Math.round(distance * 3.28084);
             return "" + distanceInFeet + "ft";
         }
         else {

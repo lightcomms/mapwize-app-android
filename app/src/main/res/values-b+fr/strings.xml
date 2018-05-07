@@ -10,7 +10,7 @@
     <string name="ok">Ok</string>
     <string name="cancel">Annuler</string>
 
-    <string name="credits">Credits</string>
+    <string name="credits">Crédits</string>
 
     <string name="search_venue">Rechercher un lieu…</string>
     <string name="search_in_venue">Rechercher dans %1$s…</string>
@@ -24,11 +24,11 @@
     <string name="access_key">Clé d\'accès</string>
     <string name="access_key_enter">Entrez une clé d\'accès</string>
     <string name="close">Fermer</string>
-    <string name="about_mapwize">About Mapwize</string>
+    <string name="about_mapwize">A propos de Mapwize</string>
     <string name="contact_us">Contactez nous</string>
-    <string name="access_granted">De nouveaux accès ont été débloqués</string>
+    <string name="access_granted">De nouveaux accès ont été ajoutés</string>
     <string name="access_invalid">Clé d\'accès invalide</string>
-    <string name="entering_in_venue">Entré dans %1$s…</string>
+    <string name="entering_in_venue">Entrée dans %1$s…</string>
     <string name="no_results">Aucun résultat</string>
     <string name="direction_not_found">Aucune direction n\'a été trouvée</string>
     <string name="coordinates">Coordonnées</string>

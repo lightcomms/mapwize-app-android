@@ -8,18 +8,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0'
-        classpath 'io.realm:realm-gradle-plugin:3.0.0'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.google.gms:google-services:3.0.0'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.4'
     }
 }
 
 allprojects {
-
-    apply plugin: 'com.jfrog.artifactory'
-    apply plugin: 'maven-publish'
 
     repositories {
         jcenter()
@@ -27,7 +20,6 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
-        maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url 'https://maven.mapwize.io'}
 
     }

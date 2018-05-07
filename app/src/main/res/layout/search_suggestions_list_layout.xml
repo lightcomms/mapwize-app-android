@@ -7,12 +7,19 @@
     android:layout_marginRight="4dp"
     android:background="@color/md_yellow_300">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_suggestions_list"
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="true"
-        android:isScrollContainer="false"
-        android:overScrollMode="never" />
+        android:elevation="8dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/search_suggestions_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="true"
+            android:isScrollContainer="false"
+            android:overScrollMode="never" />
+
+    </android.support.v7.widget.CardView>
 
 </RelativeLayout>
