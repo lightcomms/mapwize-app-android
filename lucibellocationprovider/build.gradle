@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+
+configurations.maybeCreate("default")
+artifacts.add("default", file('io.lucibel.api.1.0.2-2018-06-22.aar'))
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.github.IndoorLocation:indoor-location-android:1.0.5'
+
+    //implementation (name:'io.lucibel.api.1.0.2-2018-06-22', ext: 'aar')
+    implementation ('com.squareup.okhttp3:okhttp:3.9.1')
+    implementation('com.squareup.moshi:moshi:1.5.0')
+
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}

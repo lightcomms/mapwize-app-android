@@ -1,5 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     repositories {
         jcenter()
@@ -11,7 +10,6 @@ buildscript {
         classpath 'com.google.gms:google-services:3.0.0'
     }
 }
-
 allprojects {
 
     repositories {
@@ -20,11 +18,11 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
-        maven { url 'https://maven.mapwize.io'}
+        maven { url 'https://maven.mapwize.io' }
+        flatDir name: 'libs', dirs: "/libs"
 
     }
 }
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

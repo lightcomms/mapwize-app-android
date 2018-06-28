@@ -1,2 +1,2 @@
-include ':app', ':polestarlocationprovider'
+include ':app', ':polestarlocationprovider', ':lucibellocationprovider'
 
