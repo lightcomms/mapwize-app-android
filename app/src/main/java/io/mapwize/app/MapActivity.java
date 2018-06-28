@@ -100,6 +100,7 @@ public class MapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SearchResultsListAdapter.Listener {
 
     private static final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 0;
+    private static final int MY_PERMISSION_ACCESS_VLC_LOCATION = 1;
 
     private final int BOTTOM_PADDING = 54;
 
@@ -157,7 +158,7 @@ public class MapActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.mapwize");
+        Mapbox.getInstance(this, "pk.eyJ1IjoieGF2aWVybWVsZW5kZXoiLCJhIjoiY2pkdmgyaDJiMDlyZzJxczRiOTJoZ250YSJ9");
         setContentView(R.layout.activity_map);
         findViews();
         mapView.onCreate(savedInstanceState);
@@ -171,7 +172,8 @@ public class MapActivity extends AppCompatActivity
             @Override
             public void didLoad(MapwizePlugin mapwizePlugin) {
                 initInterfaceComponents();
-                requestLocationPermission();
+                //requestLocationPermission();
+                requestCameraPermission();
                 mapwizePlugin.setPreferredLanguage(Locale.getDefault().getLanguage());
                 mapwizePlugin.setTopPadding((int)getApplicationContext().getResources().getDimension(R.dimen.mapwize_distance_to_bottom_of_searchbar));
                 Intent intent = MapActivity.this.getIntent();
@@ -1541,10 +1543,23 @@ public class MapActivity extends AppCompatActivity
         }
     }
 
+    private void requestCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, MY_PERMISSION_ACCESS_VLC_LOCATION);
+        } else {
+            setupLocationProvider();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSION_ACCESS_COARSE_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setupLocationProvider();
+                }
+            }
+            case MY_PERMISSION_ACCESS_VLC_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setupLocationProvider();
                 }
@@ -1681,9 +1696,9 @@ public class MapActivity extends AppCompatActivity
             return;
         }
 
-        if (parsedUrlObject.getIndoorLocation() != null) {
+        /*if (parsedUrlObject.getIndoorLocation() != null) {
             mapwizeLocationProvider.defineLocation(parsedUrlObject.getIndoorLocation());
-        }
+        }*/
 
         if (parsedUrlObject.getLanguage() != null) {
             mapwizePlugin.setPreferredLanguage(parsedUrlObject.getLanguage());

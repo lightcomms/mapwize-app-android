@@ -17,6 +17,7 @@ import io.indoorlocation.manual.ManualIndoorLocationProvider;
 import io.indoorlocation.polestarlocationprovider.PolestarIndoorLocationProvider;
 import io.indoorlocation.providerselector.SelectorIndoorLocationProvider;
 import io.indoorlocation.socketlocationprovider.SocketIndoorLocationProvider;
+import io.lucibel.lucibellocationprovider.VLCIndoorLocation;
 import io.mapwize.mapwizeformapbox.model.Venue;
 
 public class LocationProvidersManager extends SelectorIndoorLocationProvider {
@@ -29,17 +30,24 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
     private ManualIndoorLocationProvider manualProvider;
     private PolestarIndoorLocationProvider polestarProvider;
     private SocketIndoorLocationProvider socketProvider;
+    private VLCIndoorLocation vlcProvider;
     private boolean started = false;
 
     public LocationProvidersManager(Activity activity) {
         super(60000);
         this.activity = activity;
+        // VLCIndoorLocationProvider
+        VLCIndoorLocation.init(activity.getApplication(),"vlcapikey");
+        this.addIndoorLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
+        this.vlcProvider=VLCIndoorLocation.getVlcIndoorLocation();
         this.gpsProvider = new FusedGpsIndoorLocationProvider(activity);
         this.addIndoorLocationProvider(this.gpsProvider);
         this.manualProvider = new ManualIndoorLocationProvider();
         this.addIndoorLocationProvider(this.manualProvider);
 
         this.gpsProvider.addListener(gpsIndoorLocationProvider);
+
+
     }
 
     public void start() {
@@ -52,6 +60,9 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
         this.manualProvider.stop();
         if (this.socketProvider != null) {
             this.socketProvider.stop();
+        }
+        if (this.vlcProvider != null) {
+            this.vlcProvider.stop();
         }
         started = false;
     }
@@ -66,6 +77,24 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
 
     public void setVenues(List<Venue> venues) {
         this.venues = venues;
+    }
+
+    private void activateVLC() {
+        if (this.vlcProvider != null) {
+            this.removeIndoorLocationProvider(this.vlcProvider);
+        }
+        VLCIndoorLocation.init(activity.getApplication(),"vlcapikey");
+        this.vlcProvider = VLCIndoorLocation.getVlcIndoorLocation();
+        this.addIndoorLocationProvider(this.vlcProvider);
+        this.vlcProvider.start();
+    }
+
+    private void deactivateVLC() {
+        if (this.vlcProvider != null) {
+            this.removeIndoorLocationProvider(this.vlcProvider);
+            this.vlcProvider.stop();
+            this.vlcProvider = null;
+        }
     }
 
     private void activateSocket(String socketUrl) {
@@ -90,7 +119,6 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
             this.removeIndoorLocationProvider(this.polestarProvider);
         }
         this.polestarProvider = new PolestarIndoorLocationProvider(this.activity, polestarKey);
-        this.addIndoorLocationProvider(this.polestarProvider);
         this.polestarProvider.setFloorByAlitudeMap(floorByAltitude);
         this.polestarProvider.start();
     }
@@ -106,6 +134,7 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
     private void deactivateAll() {
         deactivateSocket();
         deactivatePolestar();
+        deactivateVLC();
     }
 
     private Venue getNearestVenue(IndoorLocation location) {
@@ -150,6 +179,10 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
             JSONObject providers = venue.getIndoorLocationProviders();
             if (providers == null) {
                 return;
+            }
+            JSONObject vlcProviderObject = providers.optJSONObject("vlc");
+            if (vlcProviderObject !=null){
+                activateVLC();
             }
             JSONObject socketProviderObject = providers.optJSONObject("socket");
             if (socketProviderObject != null) {
