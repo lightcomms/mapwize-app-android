@@ -72,7 +72,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import io.indoorlocation.core.IndoorLocation;
-
 import io.indoorlocation.core.IndoorLocationProviderListener;
 import io.mapwize.mapwizeformapbox.DirectionOptions;
 import io.mapwize.mapwizeformapbox.FollowUserMode;

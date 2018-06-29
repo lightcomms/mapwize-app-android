@@ -40,13 +40,14 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
         VLCIndoorLocation.init(activity.getApplication(),"vlcapikey");
         this.addIndoorLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
         this.vlcProvider=VLCIndoorLocation.getVlcIndoorLocation();
+        /*/ Other that VLCLocationProvider
         this.gpsProvider = new FusedGpsIndoorLocationProvider(activity);
         this.addIndoorLocationProvider(this.gpsProvider);
         this.manualProvider = new ManualIndoorLocationProvider();
         this.addIndoorLocationProvider(this.manualProvider);
 
         this.gpsProvider.addListener(gpsIndoorLocationProvider);
-
+        // End of VLC Location provider */
 
     }
 
@@ -56,11 +57,13 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
     }
 
     public void stop() {
+        /*/  Other that VLC
         this.gpsProvider.stop();
         this.manualProvider.stop();
         if (this.socketProvider != null) {
             this.socketProvider.stop();
         }
+        // END of others */
         if (this.vlcProvider != null) {
             this.vlcProvider.stop();
         }
@@ -132,8 +135,8 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
     }
 
     private void deactivateAll() {
-        deactivateSocket();
-        deactivatePolestar();
+        //deactivateSocket();
+        //deactivatePolestar();
         deactivateVLC();
     }
 
@@ -180,7 +183,8 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
             if (providers == null) {
                 return;
             }
-            JSONObject vlcProviderObject = providers.optJSONObject("vlc");
+            activateVLC();
+            /*JSONObject vlcProviderObject = providers.optJSONObject("vlc");
             if (vlcProviderObject !=null){
                 activateVLC();
             }
@@ -213,7 +217,7 @@ public class LocationProvidersManager extends SelectorIndoorLocationProvider {
                         activatePolestar(apiKey, floors);
                     }
                 }
-            }
+            }*/
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Mapwize</string>
+    <string name="app_name">Mapping</string>
     <string name="action_settings">Instellingen</string>
     <string name="location_permission">Mapwize heeft uw toestemming nodig om uw positie op de kaart weer te geven</string>
     <string name="language_selection">Kies een taal</string>

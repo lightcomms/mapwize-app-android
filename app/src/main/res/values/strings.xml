@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mapwize</string>
+    <string name="app_name">Mapping</string>
     <string name="action_settings">Settings</string>
     <string name="location_permission">Mapwize needs your permission to display your position on the map</string>
     <string name="language_selection">Select a language</string>
