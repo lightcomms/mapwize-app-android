@@ -30,7 +30,7 @@ import io.lucibel.api.Sequencer;
 public final class VLCIndoorLocation extends IndoorLocationProvider
 {
     // use to identify messages in tables of VLC ids
-    private final static int RAW_MSG_LENGTH=6;
+    private final static int RAW_MSG_LENGTH=4;
     private static boolean started=false;
     private static IndoorLocation lastLocation;
     static {
@@ -228,7 +228,8 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
 
             current = it.next();
             //logger.severe(current.alias);
-            if (idVLC.equals(current.properties.lightId.substring(0,RAW_MSG_LENGTH))) {
+            if (current.properties.lightId.length()>=RAW_MSG_LENGTH &&
+                    idVLC.equals(current.properties.lightId.substring(0,RAW_MSG_LENGTH))) {
                 newLocation.setFloor(current.floor);
                 newLocation.setLatitude(current.location.lat);
                 newLocation.setLongitude(current.location.lon);
