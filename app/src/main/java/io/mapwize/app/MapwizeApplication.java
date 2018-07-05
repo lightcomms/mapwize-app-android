@@ -4,13 +4,15 @@ import android.app.Application;
 
 import io.mapwize.mapwizeformapbox.AccountManager;
 
+import static io.mapwize.app.BuildConfig.API_KEY;
+
 
 public class MapwizeApplication  extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
-        AccountManager.start(this, "49036d2ce04575909ccc816bcec837ca");
+        AccountManager.start(this, API_KEY);
     }
 
 }

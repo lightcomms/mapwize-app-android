@@ -14,6 +14,10 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        buildConfigField "String", "API_KEY", "${API_KEY}"
+        buildConfigField "String", "MAPBOX_TOKEN", "${MAPBOX_TOKEN}"
+        buildConfigField "String", "VENUE_ID", "${VENUE_ID}"
+
     }
 
     buildTypes {

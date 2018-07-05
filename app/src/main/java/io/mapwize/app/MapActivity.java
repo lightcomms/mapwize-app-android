@@ -94,6 +94,7 @@ import io.mapwize.mapwizeformapbox.model.Universe;
 import io.mapwize.mapwizeformapbox.model.Venue;
 
 import static com.mikepenz.materialize.util.UIUtils.convertDpToPixel;
+import static io.mapwize.app.BuildConfig.MAPBOX_TOKEN;
 
 public class MapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SearchResultsListAdapter.Listener {
@@ -157,7 +158,7 @@ public class MapActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.eyJ1IjoieGF2aWVybWVsZW5kZXoiLCJhIjoiY2pkdmgyaDJiMDlyZzJxczRiOTJoZ250YSJ9");
+        Mapbox.getInstance(this, MAPBOX_TOKEN);
         setContentView(R.layout.activity_map);
         findViews();
         mapView.onCreate(savedInstanceState);

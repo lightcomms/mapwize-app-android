@@ -22,11 +22,15 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
-        applicationId "io.mapwize.app"
+        applicationId "io.lucibel.mapwizeapp"
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 303000
         versionName "3.3.0"
+
+        buildConfigField "String", "API_KEY", "${API_KEY}"
+        buildConfigField "String", "MAPBOX_TOKEN", "${MAPBOX_TOKEN}"
+
     }
     buildTypes {
         release {

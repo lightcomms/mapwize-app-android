@@ -25,8 +25,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import static io.lucibel.lucibellocationprovider.BuildConfig.API_KEY;
+import static io.lucibel.lucibellocationprovider.BuildConfig.VENUE_ID;
+
 public class VLCBeaconListRetriever {
-    private static final String ENDPOINT = "https://api.mapwize.io/v1/beacons?api_key=49036d2ce04575909ccc816bcec837ca&venueId=5b16841d7892d00013395c5f";
+    private static final String ENDPOINT = "https://api.mapwize.io/v1/beacons?api_key="+API_KEY+"&venueId="+VENUE_ID;
     private static final Moshi MOSHI = new Moshi.Builder().build();
     private static final JsonAdapter<List<VLCBeacon>> CONTRIBUTORS_JSON_ADAPTER = MOSHI.adapter(
             Types.newParameterizedType(List.class, VLCBeacon.class));
