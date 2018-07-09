@@ -24,6 +24,9 @@
             android:id="@+id/mapboxMap"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            mapbox:mapbox_cameraZoom="16"
+            mapbox:mapbox_cameraTargetLat="48.888044"
+            mapbox:mapbox_cameraTargetLng="2.168499"
             mapbox:mapbox_uiLogo="false"
             mapbox:mapbox_uiAttribution="false"
             mapbox:mapbox_styleUrl="http://outdoor.mapwize.io/styles/mapwize/style.json?key=cab8f29af2d764be17fb092b52ebf66f"/>

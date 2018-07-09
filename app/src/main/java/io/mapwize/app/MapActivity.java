@@ -162,8 +162,9 @@ public class MapActivity extends AppCompatActivity
         setContentView(R.layout.activity_map);
         findViews();
         mapView.onCreate(savedInstanceState);
-
         final MapOptions opts = new MapOptions.Builder()
+                .venueId(BuildConfig.VENUE_ID)
+                .floor(7.0)
                 .build();
 
         mapwizePlugin = new MapwizePlugin(mapView, opts);
@@ -1600,7 +1601,7 @@ public class MapActivity extends AppCompatActivity
                                 public void onIndoorLocationChange(IndoorLocation indoorLocation) {
                                     if (lastIndoorLocation == null && indoorLocation != null) {
                                         lastIndoorLocation = indoorLocation;
-                                        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(new LatLng(indoorLocation.getLatitude(), indoorLocation.getLongitude()), 16);
+                                        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(new LatLng(indoorLocation.getLatitude(), indoorLocation.getLongitude()), 18);
                                         mapboxMap.animateCamera(cu, 3000);
                                         if (lastIndoorLocation.getFloor() != null) {
                                             mapwizePlugin.setFloor(lastIndoorLocation.getFloor());
@@ -1708,7 +1709,7 @@ public class MapActivity extends AppCompatActivity
             mapwizePlugin.setUniverseForVenue(parsedUrlObject.getUniverse(), null);
         }
 
-        Double zoom = parsedUrlObject.getZoom();
+        Double zoom = parsedUrlObject.getZoom()+5;
         LatLngBounds bounds = parsedUrlObject.getBounds();
         if (bounds.getSouthWest().equals(bounds.getNorthEast())) {
             CameraUpdate nextPosition = CameraUpdateFactory.newLatLngZoom(bounds.getSouthWest(), zoom==null?20:zoom);

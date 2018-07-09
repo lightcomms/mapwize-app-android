@@ -30,13 +30,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+    //implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     testImplementation 'junit:junit:4.12'
     implementation 'com.github.IndoorLocation:indoor-location-android:1.0.5'
 
-    //implementation (name:'io.lucibel.api.1.0.2-2018-06-22', ext: 'aar')
+    implementation 'io.lucibel.api:vlc-core:1.0.2-2018-06-22'
     implementation ('com.squareup.okhttp3:okhttp:3.9.1')
     implementation('com.squareup.moshi:moshi:1.5.0')
 
