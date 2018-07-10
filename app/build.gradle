@@ -31,8 +31,10 @@ android {
         buildConfigField "String", "API_KEY", "${API_KEY}"
         buildConfigField "String", "MAPBOX_TOKEN", "${MAPBOX_TOKEN}"
         buildConfigField "String", "VENUE_ID", "${VENUE_ID}"
-
-
+        buildConfigField "double", "FLOOR", "${FLOOR}"
+        buildConfigField "double", "LATITUDE", "${LATITUDE}"
+        buildConfigField "double", "LONGITUDE", "${LONGITUDE}"
+        buildConfigField "int", "ZOOM", "${ZOOM}"
     }
     buildTypes {
         release {
