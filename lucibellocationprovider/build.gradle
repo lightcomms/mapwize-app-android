@@ -1,8 +1,5 @@
 apply plugin: 'com.android.library'
 
-configurations.maybeCreate("default")
-artifacts.add("default", file('io.lucibel.api.1.0.2-2018-06-22.aar'))
-
 android {
     compileSdkVersion 27
 
@@ -17,7 +14,11 @@ android {
         buildConfigField "String", "API_KEY", "${API_KEY}"
         buildConfigField "String", "MAPBOX_TOKEN", "${MAPBOX_TOKEN}"
         buildConfigField "String", "VENUE_ID", "${VENUE_ID}"
-
+        buildConfigField "double", "FLOOR", "${FLOOR}"
+        buildConfigField "double", "LATITUDE", "${LATITUDE}"
+        buildConfigField "double", "LONGITUDE", "${LONGITUDE}"
+        buildConfigField "int", "ZOOM", "${ZOOM}"
+        buildConfigField "int", "VLC_RAW_MSG_LENGTH", "4"
     }
 
     buildTypes {
@@ -30,13 +31,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+    //implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     testImplementation 'junit:junit:4.12'
     implementation 'com.github.IndoorLocation:indoor-location-android:1.0.5'
 
-    //implementation (name:'io.lucibel.api.1.0.2-2018-06-22', ext: 'aar')
+    implementation 'io.lucibel.api:vlc-core:1.0.2-2018-06-22'
     implementation ('com.squareup.okhttp3:okhttp:3.9.1')
     implementation('com.squareup.moshi:moshi:1.5.0')
 

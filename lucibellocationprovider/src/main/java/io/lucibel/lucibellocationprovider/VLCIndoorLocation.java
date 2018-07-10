@@ -30,13 +30,13 @@ import io.lucibel.api.Sequencer;
 public final class VLCIndoorLocation extends IndoorLocationProvider
 {
     // use to identify messages in tables of VLC ids
-    private final static int RAW_MSG_LENGTH=6;
+    private final static int RAW_MSG_LENGTH=BuildConfig.VLC_RAW_MSG_LENGTH;
     private static boolean started=false;
     private static IndoorLocation lastLocation;
     static {
-        lastLocation = new IndoorLocation(new Location(VLCIndoorLocation.class.getName()),0.0);
-        lastLocation.setBearing(0.1f);
-        lastLocation.setAccuracy(0.1f);
+        lastLocation = new IndoorLocation(new Location(VLCIndoorLocation.class.getName()),BuildConfig.FLOOR);
+        lastLocation.setBearing(0f);
+        lastLocation.setAccuracy(0f);
     }
 
 
@@ -54,9 +54,9 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
     public static VLCIndoorLocation init(@NonNull Application application, @NonNull String vlcAPIKey){
         if(vlcIndoorLocation != null) {
             //throw new IllegalStateException("VLCIndoorLocation already initialized");
-            lastLocation = new IndoorLocation(new Location(VLCIndoorLocation.class.getName()),0.0);
-            lastLocation.setBearing(0.1f);
-            lastLocation.setAccuracy(0.1f);
+            lastLocation = new IndoorLocation(new Location(VLCIndoorLocation.class.getName()),BuildConfig.FLOOR);
+            lastLocation.setBearing(0f);
+            lastLocation.setAccuracy(0f);
             return vlcIndoorLocation;
         } else {
             vlcIndoorLocation = new VLCIndoorLocation(application,vlcAPIKey);
@@ -228,7 +228,8 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
 
             current = it.next();
             //logger.severe(current.alias);
-            if (idVLC.equals(current.properties.lightId.substring(0,RAW_MSG_LENGTH))) {
+            if (current.properties.lightId.length()>=RAW_MSG_LENGTH &&
+                    idVLC.equals(current.properties.lightId.substring(0,RAW_MSG_LENGTH))) {
                 newLocation.setFloor(current.floor);
                 newLocation.setLatitude(current.location.lat);
                 newLocation.setLongitude(current.location.lon);
@@ -256,10 +257,10 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
             newLocation.setFloor(7.0);
             //logger.severe("XME : Xavier Desk");
         }else if (idVLC.startsWith("0x68")) {
-            newLocation.setBearing(0f);
+            newLocation.setBearing(50f);
             newLocation.setLatitude(48.8880923937327);
             newLocation.setLongitude(2.1684533357620244);
-            newLocation.setAccuracy(0f);
+            newLocation.setAccuracy(50f);
             newLocation.setTime(System.currentTimeMillis());
             newLocation.setFloor(7.0);
             //logger.severe("XME : Meeting room");
