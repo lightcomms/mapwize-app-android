@@ -18,7 +18,7 @@ android {
         buildConfigField "double", "LATITUDE", "${LATITUDE}"
         buildConfigField "double", "LONGITUDE", "${LONGITUDE}"
         buildConfigField "int", "ZOOM", "${ZOOM}"
-        buildConfigField "int", "VLC_RAW_MSG_LENGTH", "4"
+        buildConfigField "int", "VLC_RAW_MSG_LENGTH", "6"
     }
 
     buildTypes {
