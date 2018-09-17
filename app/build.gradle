@@ -11,6 +11,10 @@ apply plugin: 'com.android.application'
 
 
 android {
+    packagingOptions{
+        doNotStrip '*/mips/*.so'
+        doNotStrip '*/mips64/*.so'
+    }
     signingConfigs {
         release {
             keyAlias 'slms_lio_app'
@@ -49,6 +53,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
 }
 
 dependencies {
