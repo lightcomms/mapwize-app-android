@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,7 +45,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
     private final Handler handler;
     private final String vlcApiKey;
     private boolean doLiveLocation=false;
-    private List<VLCBeaconListRetriever.VLCBeacon> vlcKnownLocation;
+    private List<VLCBeaconListRetriever.VLCBeacon> vlcKnownLocations;
     private String vlcId;
     private java.util.logging.Logger logger= Logger.getLogger(VLCIndoorLocation.class.getName());
     //private final static  java.util.logging.Logger logger = Logger.getLogger(VLCIndoorLocation.class.getName());
@@ -79,13 +78,13 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
             public void onFailure( IOException e) {
                 logger.severe("onFailure:"+e.getMessage());
                 doLiveLocation = false;
-                vlcKnownLocation=null;
+                vlcKnownLocations =null;
             }
 
             @Override
             public void onSuccess(List<VLCBeaconListRetriever.VLCBeacon> beacons)  {
                 logger.severe("onResponse");
-                vlcKnownLocation=beacons;
+                vlcKnownLocations =beacons;
                 doLiveLocation=true;
 
             }
@@ -204,8 +203,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
     public void start() {
         //Sequencer.camBack(application.getApplicationContext());
         //logger.severe("XME : STARTED VLC!!");
-
-        Sequencer.start(application.getApplicationContext(), ipcCallbacks,"camback", 100);
+        Sequencer.start(application.getApplicationContext(), ipcCallbacks);
     }
 
     @Override
@@ -223,20 +221,20 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
         IndoorLocation newLocation = new IndoorLocation(lastLocation,lastLocation.getFloor());
         boolean found = false;
         VLCBeaconListRetriever.VLCBeacon current;
-        Iterator<VLCBeaconListRetriever.VLCBeacon> it = vlcKnownLocation.iterator();
-        while (it.hasNext()) {
+        for (VLCBeaconListRetriever.VLCBeacon aVlcKnownLocation : vlcKnownLocations) {
 
-            current = it.next();
+            current = aVlcKnownLocation;
             //logger.severe(current.alias);
-            if (current.properties.lightId.length()>=RAW_MSG_LENGTH &&
-                    idVLC.equals(current.properties.lightId.substring(0,RAW_MSG_LENGTH))) {
+
+            if (current.properties.lightId.length() >= RAW_MSG_LENGTH &&
+                    idVLC.equals(current.properties.lightId.substring(0, RAW_MSG_LENGTH))) {
                 newLocation.setFloor(current.floor);
                 newLocation.setLatitude(current.location.lat);
                 newLocation.setLongitude(current.location.lon);
                 newLocation.setTime(System.currentTimeMillis());
                 newLocation.setAccuracy(0f);
                 newLocation.setBearing(0f);
-                found=true;
+                found = true;
                 break;
             }
         }
