@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -37,7 +37,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'com.github.IndoorLocation:indoor-location-android:1.0.5'
 
-    implementation 'io.lucibel.api:vlc-core:1.0.2-2018-06-22'
+    implementation 'io.lucibel.api:vlc-core-ent:1.0.4-2018-11-15'
     implementation ('com.squareup.okhttp3:okhttp:3.9.1')
     implementation('com.squareup.moshi:moshi:1.5.0')
 
